@@ -3,58 +3,63 @@ package saver
 import (
 	"database/sql"
 	"github.com/ProSt1ll/UrlCutterAPI/model"
+	"log"
+	//_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	//_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
 	"net/url"
 )
 
 type DBSaver struct {
-	db     *sql.DB
-	host   string
-	port   string
-	dbname string
+	DB     *sql.DB
+	Host   string
+	Port   string
+	DBName string
 }
 
 func NewDBSaver(db *sql.DB) Saver {
 	return &DBSaver{
-		db: db,
+		DB: db,
 	}
 }
 
-func NewDB() Saver {
-	return &DBSaver{}
+func NewDB(host string, port string, dbname string) DBSaver {
+	b := DBSaver{
+		Host:   host,
+		Port:   port,
+		DBName: dbname,
+	}
+	if err := b.Open(); err != nil {
+		panic(err)
+	}
+	return b
 }
 
-func (b *DBSaver) Config(host string, port string, dbname string) {
-	b.host = host
-	b.port = port
-	b.dbname = dbname
-}
-
+// Open connection to database
 func (b *DBSaver) Open() error {
-	db, err := sql.Open("postgres", "host="+b.host+" port="+b.port+" user=postgres password=medusa dbname="+b.dbname+" sslmode=disable ")
+	db, err := sql.Open("postgres", "host="+b.Host+" port="+b.Port+" user=postgres password=medusa dbname="+b.DBName+" sslmode=disable ")
 	if err != nil {
 		return err
 	}
-
 	if err := db.Ping(); err != nil {
-		return err
+		log.Fatal(err)
 	}
-
-	b.db = db
-
+	b.DB = db
 	return nil
 }
 
 func (b *DBSaver) Close() error {
-	err := b.db.Close()
+	err := b.DB.Close()
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
+// StoreURL stores model of
 func (b *DBSaver) StoreURL(urls model.URLs) (int, error) {
-	if err := b.db.QueryRow("INSERT INTO urls (long_url,short_url) VALUES ($1,$2) RETURNING id",
+
+	if err := b.DB.QueryRow("INSERT INTO urls (long_url,short_url) VALUES ($1,$2) RETURNING id",
 		urls.LongUrl.String(),
 		urls.ShortUrl,
 	).Scan(&urls.Id); err != nil {
@@ -63,10 +68,12 @@ func (b *DBSaver) StoreURL(urls model.URLs) (int, error) {
 	return urls.Id, nil
 }
 
+// LoadShort load's short URL with full
 func (b *DBSaver) LoadShort(key url.URL) (model.URLs, bool) {
+
 	u := model.URLs{}
 	var temp string
-	if err := b.db.QueryRow("SELECT id, long_url, short_url FROM urls WHERE long_url  = $1", key.String()).Scan(
+	if err := b.DB.QueryRow("SELECT id, long_url, short_url FROM urls WHERE long_url  = $1", key.String()).Scan(
 		&u.Id,
 		&temp,
 		&u.ShortUrl); err != nil {
@@ -82,19 +89,17 @@ func (b *DBSaver) LoadShort(key url.URL) (model.URLs, bool) {
 	return u, true
 }
 
+// LoadLong load's full URL with short
 func (b *DBSaver) LoadLong(key string) (model.URLs, bool) {
 	u := model.URLs{}
 	var temp string
-	if err := b.db.QueryRow("SELECT id, long_url, short_url FROM URLs WHERE short_url  = $1", key).Scan(
+	if err := b.DB.QueryRow("SELECT id, long_url, short_url FROM URLs WHERE short_url  = $1", key).Scan(
 		&u.Id,
 		&temp,
 		&u.ShortUrl); err != nil {
 		return u, false
 	}
-
 	o, _ := url.Parse(temp)
 	u.LongUrl = *o
-
 	return u, true
-
 }

@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  urlcutterapi:
+    build: ./
+    command: ./UrlCutterApi
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    environment:
+      - SaveMethod=postgres
+      - DBHost=db
+      - DBPort=5432
+      - ServerPort=8000
+      - DBName=postgres
+      - Docker=true
+  db:
+    restart: always
+    image: postgres:15.1-alpine
+    environment:
+      - POSTGRES_PASSWORD=medusa
+      - POSTGRES_DB=myurldb
+      - POSTGRES_USER=root
+    ports:
+      - 5436:5432

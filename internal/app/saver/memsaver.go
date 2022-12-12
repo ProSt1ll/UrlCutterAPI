@@ -48,16 +48,6 @@ func (m *MemSaver) LoadLong(key string) (model.URLs, bool) {
 	}, !(a.String() == "")
 }
 
-func (m *MemSaver) Config(host string, port string, dbname string) {
-
-}
-
-func (m *MemSaver) Open() error {
-
-	return nil
-}
-
 func (m *MemSaver) Close() error {
-
 	return nil
 }

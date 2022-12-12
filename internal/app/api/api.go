@@ -1,4 +1,4 @@
-package apiserver
+package api
 
 import (
 	_ "fmt"
@@ -22,10 +22,9 @@ type APIServer struct {
 
 func New(saver saver.Saver) *APIServer {
 	return &APIServer{
-		Server:     http.NewServeMux(),
-		saver:      saver,
-		counterUrl: 0,
-		cutter:     urlcut.New(),
+		Server: http.NewServeMux(),
+		saver:  saver,
+		cutter: urlcut.New(),
 	}
 }
 
@@ -50,48 +49,57 @@ func RouteMethods(methods Methods) http.Handler {
 }
 
 func (s *APIServer) ParsePostRequest(w http.ResponseWriter, r *http.Request) {
-	len := r.ContentLength
-	body := make([]byte, len)
+	body := make([]byte, r.ContentLength)
 	r.Body.Read(body)
 	longUrl, err := url.ParseRequestURI(string(body))
 	if err != nil {
+		//if URL invalid, example: daskgjflajsfpdgjld.ru
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
-	if longUrl.Scheme < "ht" {
-		longUrl, err = url.Parse(longUrl.Host + longUrl.Path)
-		if err != nil {
-
-		}
-
-	} else {
+	if longUrl.Scheme > "" {
 		longUrl, err = url.Parse(longUrl.Scheme + "://" + longUrl.Host + longUrl.Path)
 		if err != nil {
-
+			panic("parse error")
+		}
+	} else {
+		longUrl, err = url.Parse(longUrl.Host + longUrl.Path)
+		if err != nil {
+			panic("parse error")
 		}
 
 	}
+	// try to find in database
 	Url, ok := s.saver.LoadShort(*longUrl)
 	if ok {
 		w.WriteHeader(http.StatusOK)
 		_, err = w.Write([]byte("https://ozon.cc/" + Url.ShortUrl + "\n"))
 		if err != nil {
-
+			panic(err)
 		}
 		return
 	}
+	// if URLs more than can be in variable
 	if s.counterUrl == math.MaxInt {
 		s.counterUrl = 0
 	}
+
 	s.counterUrl++
 	Url = model.URLs{}
 	Url.ShortUrl = s.cutter.CreateShortURL(s.counterUrl)
 	Url.LongUrl = *longUrl
-	s.saver.StoreURL(Url)
+	var n int
+	if n, err = s.saver.StoreURL(Url); err != nil {
+		panic(err)
+	}
+	//if we save config of urlcutter, we can continue
+	if n > 0 {
+		s.counterUrl = n
+	}
+	//create URL
 	_, err = w.Write([]byte("https://ozon.cc/" + Url.ShortUrl + "\n"))
 	if err != nil {
-
+		panic(err)
 	}
 	w.WriteHeader(http.StatusOK)
 	return
@@ -102,7 +110,7 @@ func (s *APIServer) ParseGetRequest(w http.ResponseWriter, r *http.Request) {
 	r.Body.Read(body)
 	shortUrl, err := url.Parse(string(body))
 	if err != nil {
-
+		panic("parse error")
 	}
 	url, ok := s.saver.LoadLong(shortUrl.Path[1:])
 	if !ok {
@@ -110,5 +118,7 @@ func (s *APIServer) ParseGetRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(url.LongUrl.String() + "\n"))
+	if _, err := w.Write([]byte(url.LongUrl.String() + "\n")); err != nil {
+		panic(err)
+	}
 }

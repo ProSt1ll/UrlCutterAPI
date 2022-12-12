@@ -21,6 +21,7 @@ func New() *UrlCut {
 	return &temp
 }
 
+// Shuffle the list of symbols
 func (u *UrlCut) Shuffle() {
 
 	for i, _ := range u.list {
@@ -29,7 +30,9 @@ func (u *UrlCut) Shuffle() {
 	}
 }
 
-// 1982608315404440064116146708361898137544773690227268628106279599612729753600000000000000 ссылок можно сделать...
+// 1982608315404440064116146708361898137544773690227268628106279599612729753600000000000000 max cnt of uuid
+
+// CreateShortURL create unique string from int
 func (u *UrlCut) CreateShortURL(val int) string {
 	var n int
 	s := []rune("0000000000")

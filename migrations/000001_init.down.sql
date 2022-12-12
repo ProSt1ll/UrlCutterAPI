@@ -1,3 +1,0 @@
-DROP TABLE URLs;
-
-DROP TABLE config;
