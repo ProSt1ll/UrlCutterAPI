@@ -1,5 +1,5 @@
-.PHONY: buil
+.PHONY: build
 build:
-		go build -v ./cmd/apiserver
+		go build -o UrlCutterApi ./cmd/main.go
 
 .DEFAULT_GOAL := build
