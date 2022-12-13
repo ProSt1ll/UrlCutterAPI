@@ -24,12 +24,10 @@ func init() {
 	flag.StringVar(&DBHost, "DBHost", "localhost", "host of BaseData")
 	flag.StringVar(&ServerPort, "ServerPort", "8000", "port of server")
 	flag.StringVar(&DBName, "DBName", "myurldb", "name of BaseBata")
-
-}
-func main() {
 	flag.Parse()
-	var save saver.Saver
+}
 
+func main() {
 	//input for docker
 	Docker := os.Getenv("Docker")
 	if Docker == "true" {
@@ -39,6 +37,8 @@ func main() {
 		ServerPort = os.Getenv("ServerPort")
 		DBName = os.Getenv("DBName")
 	}
+
+	var save saver.Saver
 	log.Println(SaveMethod)
 	switch SaveMethod {
 	case "postgres":
@@ -48,7 +48,7 @@ func main() {
 		}
 		defer func() {
 			if err := db.Close(); err != nil {
-				log.Fatalf("close db error", err)
+				log.Fatal(err)
 			}
 		}()
 		save = saver.NewDBSaver(db.DB)
@@ -59,9 +59,8 @@ func main() {
 	}
 
 	server := api.New(save)
-	err := server.Start()
-	if err != nil {
-		panic(err)
+	if err := server.Start(); err != nil {
+		log.Fatal(err)
 	}
 	log.Println("Starting server...")
 	log.Println("localhost" + ":" + ServerPort)

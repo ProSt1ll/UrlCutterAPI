@@ -3,11 +3,8 @@ package saver
 import (
 	"database/sql"
 	"github.com/ProSt1ll/UrlCutterAPI/model"
-	"github.com/pressly/goose/v3"
-	"log"
-	//_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	//_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
+	"github.com/pressly/goose/v3"
 	"net/url"
 )
 
@@ -30,9 +27,6 @@ func NewDB(host string, port string, dbname string) DBSaver {
 		Port:   port,
 		DBName: dbname,
 	}
-	if err := b.Open(); err != nil {
-		log.Fatal(err)
-	}
 	return b
 }
 
@@ -40,43 +34,44 @@ func NewDB(host string, port string, dbname string) DBSaver {
 func (b *DBSaver) Open() error {
 
 	db, err := sql.Open("postgres", "host="+b.Host+" port="+b.Port+" user=postgres password=medusa dbname="+b.DBName+" sslmode=disable ")
-	if err := goose.Up(db, "./migrations"); err != nil {
-		return (err)
-	}
-
 	if err != nil {
 		return err
 	}
+
 	if err := db.Ping(); err != nil {
 		return err
 	}
+
+	if err := goose.Up(db, "./migrations"); err != nil {
+		return err
+	}
+
 	b.DB = db
 	return nil
 }
 
 func (b *DBSaver) Close() error {
-	err := b.DB.Close()
-	if err != nil {
+	if err := b.DB.Close(); err != nil {
 		return err
 	}
+
 	return nil
 }
 
 // StoreURL stores model of
 func (b *DBSaver) StoreURL(urls model.URLs) (int, error) {
-
 	if err := b.DB.QueryRow("INSERT INTO urls (long_url,short_url) VALUES ($1,$2) RETURNING id",
 		urls.LongUrl.String(),
 		urls.ShortUrl,
 	).Scan(&urls.Id); err != nil {
 		return 0, err
 	}
+
 	return urls.Id, nil
 }
 
 // LoadShort load's short URL with full
 func (b *DBSaver) LoadShort(key url.URL) (model.URLs, bool) {
-
 	u := model.URLs{}
 	var temp string
 	if err := b.DB.QueryRow("SELECT id, long_url, short_url FROM urls WHERE long_url  = $1", key.String()).Scan(
@@ -92,6 +87,7 @@ func (b *DBSaver) LoadShort(key url.URL) (model.URLs, bool) {
 	}
 
 	u.LongUrl = *o
+
 	return u, true
 }
 
@@ -105,7 +101,9 @@ func (b *DBSaver) LoadLong(key string) (model.URLs, bool) {
 		&u.ShortUrl); err != nil {
 		return u, false
 	}
+
 	o, _ := url.Parse(temp)
 	u.LongUrl = *o
+
 	return u, true
 }

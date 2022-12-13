@@ -1,7 +1,6 @@
 package urlcut
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -13,7 +12,6 @@ func TestUrlCut_Shuffle(t *testing.T) {
 	cut1 := New()
 	temp = string(cut.list)
 	temp1 = string(cut1.list)
-	fmt.Println(temp)
 	assert.NotEqual(t, temp, temp1)
 	for i := 0; i < 10; i++ {
 		cut.Shuffle()

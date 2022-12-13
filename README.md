@@ -21,11 +21,12 @@ $ ./build - первый запуск и сборка
 
 Все следующие запуски:
 
-$ docker-compose run [options] urlcutterapi
+$ docker-compose run [options] --service-ports api
 
 example:
 
-$ docker-compose run -e SaveMethod=inMemory urlcutterapi
+$ docker-compose run -e SaveMethod=inMemory --service-ports api
+
 
 default of  env. variables:
   	- SaveMethod=postgres

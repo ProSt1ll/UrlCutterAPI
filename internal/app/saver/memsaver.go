@@ -25,12 +25,14 @@ func (m *MemSaver) StoreURL(urls model.URLs) (int, error) {
 	m.mutex.Lock()
 	m.cacheLong[urls.ShortUrl] = urls.LongUrl
 	m.cacheShort[urls.LongUrl] = urls.ShortUrl
+
 	return 0, nil
 }
 
 func (m *MemSaver) LoadShort(key url.URL) (model.URLs, bool) {
 	defer m.mutex.RUnlock()
 	m.mutex.RLock()
+
 	return model.URLs{
 		LongUrl:  key,
 		ShortUrl: m.cacheShort[key],

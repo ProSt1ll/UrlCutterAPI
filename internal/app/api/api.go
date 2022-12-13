@@ -1,13 +1,11 @@
 package api
 
 import (
-	_ "fmt"
 	"github.com/ProSt1ll/UrlCutterAPI/internal/app/saver"
 	"github.com/ProSt1ll/UrlCutterAPI/internal/app/urlcut"
 	"github.com/ProSt1ll/UrlCutterAPI/model"
 	"math"
 	"net/http"
-	_ "net/http"
 	"net/url"
 )
 
@@ -33,6 +31,7 @@ func (s *APIServer) Start() error {
 		http.MethodGet:  s.ParseGetRequest,
 		http.MethodPost: s.ParsePostRequest,
 	}))
+
 	return nil
 }
 
@@ -43,6 +42,7 @@ func RouteMethods(methods Methods) http.Handler {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
+
 		resolver(w, r)
 	})
 }
@@ -56,6 +56,7 @@ func (s *APIServer) ParsePostRequest(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
 	if longUrl.Scheme > "" {
 		longUrl, err = url.Parse(longUrl.Scheme + "://" + longUrl.Host + longUrl.Path)
 		if err != nil {
@@ -78,15 +79,17 @@ func (s *APIServer) ParsePostRequest(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+
 	// if URLs more than can be in variable
 	if s.counterUrl == math.MaxInt {
 		s.counterUrl = 0
 	}
-
 	s.counterUrl++
-	Url = model.URLs{}
-	Url.ShortUrl = s.cutter.CreateShortURL(s.counterUrl)
-	Url.LongUrl = *longUrl
+
+	Url = model.URLs{
+		ShortUrl: s.cutter.CreateShortURL(s.counterUrl),
+		LongUrl:  *longUrl,
+	}
 	var n int
 	if n, err = s.saver.StoreURL(Url); err != nil {
 		panic(err)
@@ -101,23 +104,29 @@ func (s *APIServer) ParsePostRequest(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	w.WriteHeader(http.StatusOK)
-	return
 }
 
 func (s *APIServer) ParseGetRequest(w http.ResponseWriter, r *http.Request) {
 	body := make([]byte, r.ContentLength)
-	r.Body.Read(body)
+	//body.read always give a EOF error
+	if n, err := r.Body.Read(body); err != nil && n < 1 {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 	shortUrl, err := url.Parse(string(body))
 	if err != nil {
 		panic("parse error")
 	}
-	url, ok := s.saver.LoadLong(shortUrl.Path[1:])
+
+	loadedURL, ok := s.saver.LoadLong(shortUrl.Path[1:])
+
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
-	if _, err := w.Write([]byte(url.LongUrl.String() + "\n")); err != nil {
+	if _, err := w.Write([]byte(loadedURL.LongUrl.String() + "\n")); err != nil {
 		panic(err)
 	}
 }

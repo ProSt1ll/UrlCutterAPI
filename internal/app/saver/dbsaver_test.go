@@ -17,13 +17,16 @@ func TestDBSaver_StoreURL(t *testing.T) {
 		log.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 		return
 	}
+
 	type args struct {
 		item model.URLs
 	}
+
 	testURL, err := url.Parse("exampleLong")
 	if err != nil {
 
 	}
+
 	testTable := []struct {
 		name    string
 		input   args
@@ -88,13 +91,16 @@ func TestDBSaver_LoadLong(t *testing.T) {
 		log.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 		return
 	}
+
 	type args struct {
 		item string
 	}
+
 	testURL, err := url.Parse("exampleLong")
 	if err != nil {
 
 	}
+
 	testTable := []struct {
 		name    string
 		input   args
@@ -149,7 +155,6 @@ func TestDBSaver_LoadLong(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)
 			assert.Equal(t, ok, tt.ok)
-
 		})
 	}
 }
@@ -161,17 +166,21 @@ func TestDBSaver_LoadShort(t *testing.T) {
 		log.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 		return
 	}
+
 	type args struct {
 		item url.URL
 	}
+
 	testURL, err := url.Parse("exampleLong")
 	if err != nil {
 
 	}
+
 	test2URL, err := url.Parse("example2Long")
 	if err != nil {
 
 	}
+
 	testTable := []struct {
 		name    string
 		input   args
@@ -229,7 +238,6 @@ func TestDBSaver_LoadShort(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)
 			assert.Equal(t, ok, tt.ok)
-
 		})
 	}
 }

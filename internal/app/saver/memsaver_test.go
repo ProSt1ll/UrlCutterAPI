@@ -3,6 +3,7 @@ package saver
 import (
 	"github.com/ProSt1ll/UrlCutterAPI/model"
 	"github.com/stretchr/testify/assert"
+	"log"
 	"net/url"
 	"testing"
 )
@@ -71,21 +72,28 @@ func TestMemSaver_LoadLong(t *testing.T) {
 
 	}
 	s := NewMemSaver()
-	s.StoreURL(model.URLs{
+
+	if _, err = s.StoreURL(model.URLs{
 		LongUrl:  *testURL1,
 		ShortUrl: "exampleShort",
 		Id:       2,
-	})
-	s.StoreURL(model.URLs{
+	}); err != nil {
+		log.Fatal(err)
+	}
+	if _, err = s.StoreURL(model.URLs{
 		LongUrl:  *testURL2,
 		ShortUrl: "example2Short",
 		Id:       2,
-	})
-	s.StoreURL(model.URLs{
+	}); err != nil {
+		log.Fatal(err)
+	}
+	if _, err = s.StoreURL(model.URLs{
 		LongUrl:  *testURL3,
 		ShortUrl: "example3Short",
 		Id:       2,
-	})
+	}); err != nil {
+		log.Fatal(err)
+	}
 
 	testTable := []struct {
 		item string
@@ -143,21 +151,27 @@ func TestMemSaver_LoadShort(t *testing.T) {
 
 	}
 	s := NewMemSaver()
-	s.StoreURL(model.URLs{
+	if _, err = s.StoreURL(model.URLs{
 		LongUrl:  *testURL1,
 		ShortUrl: "exampleShort",
 		Id:       2,
-	})
-	s.StoreURL(model.URLs{
+	}); err != nil {
+		log.Fatal(err)
+	}
+	if _, err = s.StoreURL(model.URLs{
 		LongUrl:  *testURL2,
 		ShortUrl: "example2Short",
 		Id:       2,
-	})
-	s.StoreURL(model.URLs{
+	}); err != nil {
+		log.Fatal(err)
+	}
+	if _, err = s.StoreURL(model.URLs{
 		LongUrl:  *testURL3,
 		ShortUrl: "example3Short",
 		Id:       2,
-	})
+	}); err != nil {
+		log.Fatal(err)
+	}
 
 	testTable := []struct {
 		item url.URL
