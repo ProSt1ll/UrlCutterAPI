@@ -14,9 +14,11 @@ curl -X GET -d "https://ozon.cc/givemeajob" localhost:8000
 Инструкция по использованию:
 
 $ make
+
 $ ./urlcutterapi
 
 $ docker-compose up --build
+
 $ docker-compose run [options] urlcutterapi
 
 example:
