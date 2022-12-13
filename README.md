@@ -17,7 +17,7 @@ $ make
 
 $ ./urlcutterapi
 
-$ docker-compose up --build
+$ docker-compose up --build --nostart
 
 $ docker-compose run [options] urlcutterapi
 
