@@ -17,4 +17,5 @@ RUN go test ./internal/app/urlcut
 RUN go build -o UrlCutterApi ./cmd/main.go
 
 #RUN goose -dir ./migrations postgres  "user=postgres password=medusa dbname=postgres sslmode=disable" up
+
 CMD ["./UrlCutterApi"]

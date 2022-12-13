@@ -3,6 +3,7 @@ package saver
 import (
 	"database/sql"
 	"github.com/ProSt1ll/UrlCutterAPI/model"
+	"github.com/pressly/goose/v3"
 	"log"
 	//_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	//_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -30,19 +31,24 @@ func NewDB(host string, port string, dbname string) DBSaver {
 		DBName: dbname,
 	}
 	if err := b.Open(); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	return b
 }
 
 // Open connection to database
 func (b *DBSaver) Open() error {
+
 	db, err := sql.Open("postgres", "host="+b.Host+" port="+b.Port+" user=postgres password=medusa dbname="+b.DBName+" sslmode=disable ")
+	if err := goose.Up(db, "./migrations"); err != nil {
+		return (err)
+	}
+
 	if err != nil {
 		return err
 	}
 	if err := db.Ping(); err != nil {
-		log.Fatal(err)
+		return err
 	}
 	b.DB = db
 	return nil

@@ -43,7 +43,6 @@ func RouteMethods(methods Methods) http.Handler {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
-
 		resolver(w, r)
 	})
 }

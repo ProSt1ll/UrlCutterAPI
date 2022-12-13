@@ -19,7 +19,7 @@ var (
 
 func init() {
 	//input without docker
-	flag.StringVar(&SaveMethod, "SaveMethod", "postgres", "postgres or inMemory")
+	flag.StringVar(&SaveMethod, "SaveMethod", "inMemory", "postgres or inMemory")
 	flag.StringVar(&DBPort, "DBPort", "5432", "port of BaseData")
 	flag.StringVar(&DBHost, "DBHost", "localhost", "host of BaseData")
 	flag.StringVar(&ServerPort, "ServerPort", "8000", "port of server")
@@ -39,7 +39,7 @@ func main() {
 		ServerPort = os.Getenv("ServerPort")
 		DBName = os.Getenv("DBName")
 	}
-
+	log.Println(SaveMethod)
 	switch SaveMethod {
 	case "postgres":
 		db := saver.NewDB(DBHost, DBPort, DBName)
@@ -63,6 +63,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	log.Println("Server started!")
+	log.Println("Starting server...")
+	log.Println("localhost" + ":" + ServerPort)
 	log.Fatal(http.ListenAndServe(":"+ServerPort, server.Server))
+
 }
