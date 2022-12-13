@@ -15,15 +15,17 @@ curl -X GET -d "https://ozon.cc/givemeajob" localhost:8000
 
 $ make
 
-для докера:
+Для докера:
 
+$ ./build - первый запуск и сборка
 
-$ ./start.sh [options] 
+Все следующие запуски:
+
+$ docker-compose run [options] urlcutterapi
 
 example:
 
-$ ./start.sh inMemory
-$ ./start.sh postgres
+$ docker-compose run -e SaveMethod=inMemory urlcutterapi
 
 default of  env. variables:
   	- SaveMethod=postgres

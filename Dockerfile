@@ -7,7 +7,7 @@ ENV GOPATH=/
 COPY ./ ./
 
 RUN go mod download
-
+EXPOSE 8000 8000
 
 #RUN go install github.com/pressly/goose/v3/cmd/goose@latest
 RUN go test ./internal/app/saver ./internal/app/urlcut
