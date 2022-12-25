@@ -110,14 +110,17 @@ func (s *APIServer) ParseGetRequest(w http.ResponseWriter, r *http.Request) {
 	body := make([]byte, r.ContentLength)
 	//body.read always give a EOF error
 	if n, err := r.Body.Read(body); err != nil && n < 1 {
-		w.WriteHeader(http.StatusNotFound)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	shortUrl, err := url.Parse(string(body))
 	if err != nil {
 		panic("parse error")
 	}
-
+	if len(shortUrl.Path) < 2 {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
 	loadedURL, ok := s.saver.LoadLong(shortUrl.Path[1:])
 
 	if !ok {
